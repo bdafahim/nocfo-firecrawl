@@ -1,0 +1,63 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# =========================
+# Environment variables
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# Databases / local state
+# =========================
+*.db
+*.sqlite
+*.sqlite3
+local.db
+
+# =========================
+# Logs
+# =========================
+*.log
+
+# =========================
+# Editor / OS
+# =========================
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# =========================
+# Testing artifacts
+# =========================
+test_firecrawl_payload.json
+
+# =========================
+# Uvicorn / FastAPI
+# =========================
+__pypackages__/
+.coverage
+htmlcov/
+
+# =========================
+# Optional: PyCharm
+# =========================
+*.iml
