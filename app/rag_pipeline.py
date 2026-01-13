@@ -3,19 +3,19 @@ from typing import Any, Dict, Optional
 
 # This module is the integration point.
 
-def stable_vector_id(company_id: str, source_id: str, url: str) -> str:
+def stable_vector_id(business_slug: str, source_id: str, url: str) -> str:
     """
     Stable ID for overwrite-latest upserts:
     Use URL (or hash of it)
     We include company/source too, to avoid collisions in one collection.
     """
-    raw = f"{company_id}|{source_id}|{url}".encode("utf-8")
+    raw = f"{business_slug}|{source_id}|{url}".encode("utf-8")
     return hashlib.sha256(raw).hexdigest()
 
 
 def ingest_markdown_to_qdrant(
     *,
-    company_id: str,
+    business_slug: str,
     source_id: str,
     url: str,
     markdown: str,
@@ -28,9 +28,9 @@ def ingest_markdown_to_qdrant(
     - chunk markdown (preserving headers/lists)
     - compute embeddings
     - upsert into Qdrant collection with metadata:
-        company_id, source_id, url, crawl_job_id, ...
+        business_slug, source_id, url, crawl_job_id, ...
     """
-    vector_doc_id = stable_vector_id(company_id, source_id, url)
+    vector_doc_id = stable_vector_id(business_slug, source_id, url)
 
     # TODO: Replace with function call, e.g.
     # from app.tools.rag import upsert_markdown_document
@@ -38,8 +38,8 @@ def ingest_markdown_to_qdrant(
     #   collection="finnish_tax_law",
     #   point_id=vector_doc_id,
     #   markdown=markdown,
-    #   payload={"company_id": company_id, "source_id": source_id, "url": url, **(doc_metadata or {})},
+    #   payload={"business_slug": business_slug, "source_id": source_id, "url": url, **(doc_metadata or {})},
     # )
 
     # For now, just log:
-    print(f"[RAG] Upsert {vector_doc_id} url={url} company_id={company_id} source_id={source_id} len={len(markdown)}")
+    print(f"[RAG] Upsert {vector_doc_id} url={url} business_slug={business_slug} source_id={source_id} len={len(markdown)}")

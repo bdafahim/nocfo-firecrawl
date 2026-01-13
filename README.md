@@ -70,22 +70,22 @@ Create `test_firecrawl_payload.json` in the project root:
 
 ```json
 {
-  "success": true,
-  "type": "crawl.page",
-  "id": "evt_test_001",
-  "metadata": {
-    "company_id": "company_123",
-    "source_id": "vero",
-    "crawl_job_id": "crawl_test_001"
-  },
-  "data": [
-    {
-      "markdown": "# Tax Deduction\n\nThis page explains tax deductions in Finland.",
-      "metadata": {
-        "source_url": "https://vero.fi/tax-deduction"
+   "success": true,
+   "type": "crawl.page",
+   "id": "evt_test_001",
+   "metadata": {
+      "business_slug": "company_123",
+      "source_id": "vero",
+      "crawl_job_id": "crawl_test_001"
+   },
+   "data": [
+      {
+         "markdown": "# Tax Deduction\n\nThis page explains tax deductions in Finland.",
+         "metadata": {
+            "source_url": "https://vero.fi/tax-deduction"
+         }
       }
-    }
-  ]
+   ]
 }
 ```
 
@@ -104,6 +104,30 @@ EOF
 ```
 
 Copy the full output (including `sha256=`).
+
+### Step 1 and 2 in a single command
+
+```bash
+SIG=$(python3 - <<'EOF'
+import os, hmac, hashlib, pathlib
+# load secret from .env (simple parse)
+secret = None
+for line in pathlib.Path(".env").read_text().splitlines():
+    if line.startswith("FIRECRAWL_WEBHOOK_SECRET="):
+        secret = line.split("=",1)[1].strip()
+        break
+assert secret, "FIRECRAWL_WEBHOOK_SECRET not found in .env"
+body = pathlib.Path("test_firecrawl_payload.json").read_bytes()
+print("sha256=" + hmac.new(secret.encode(), body, hashlib.sha256).hexdigest())
+EOF
+)
+
+curl -X POST http://127.0.0.1:8000/v1/hooks/firecrawl-ingest \
+  -H "Content-Type: application/json" \
+  -H "X-Firecrawl-Signature: $SIG" \
+  --data-binary @test_firecrawl_payload.json
+
+```
 
 ### Step 3: Send Webhook Request
 

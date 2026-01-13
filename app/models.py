@@ -33,7 +33,7 @@ class FirecrawlEvent(Base):
 
 class Document(Base):
     """
-    Stores the latest content for a given (company_id, source_id, url).
+    Stores the latest content for a given (business_slug, source_id, url).
     Overwrite latest; keep lightweight version metadata (hash, timestamps).
     """
     __tablename__ = "documents"
@@ -43,7 +43,7 @@ class Document(Base):
     # deterministic key, used as stable identifier across overwrites
     doc_key: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
 
-    company_id: Mapped[str] = mapped_column(String(128), nullable=False)
+    business_slug: Mapped[str] = mapped_column(String(128), nullable=False)
     source_id: Mapped[str] = mapped_column(String(128), nullable=False)
     url: Mapped[str] = mapped_column(Text, nullable=False)
 

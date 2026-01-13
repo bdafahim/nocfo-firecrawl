@@ -26,8 +26,8 @@ def sha256_hex(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def doc_key(company_id: str, source_id: str, url: str) -> str:
-    return hashlib.sha256(f"{company_id}|{source_id}|{url}".encode("utf-8")).hexdigest()
+def doc_key(business_slug: str, source_id: str, url: str) -> str:
+    return hashlib.sha256(f"{business_slug}|{source_id}|{url}".encode("utf-8")).hexdigest()
 
 
 @router.post("/firecrawl-ingest")
@@ -70,14 +70,14 @@ async def firecrawl_ingest(
         return {"ok": True, "event_id": event.id, "type": event.type}
 
     # 3) Enforce tenant/source mapping
-    company_id = str(event.metadata.get("company_id") or "")
+    business_slug = str(event.metadata.get("business_slug") or "")
     source_id = str(event.metadata.get("source_id") or "")
     crawl_job_id = str(event.metadata.get("crawl_job_id") or event.id or "")
 
-    if not company_id or not source_id:
+    if not business_slug or not source_id:
         raise HTTPException(
             status_code=400,
-            detail="Missing required metadata: company_id and source_id",
+            detail="Missing required metadata: business_slug and source_id",
         )
 
     # Firecrawl "data" can include one or more docs per event
@@ -102,7 +102,7 @@ async def firecrawl_ingest(
         url_str = str(url)
 
         # 4) Document idempotency (overwrite latest, but skip if unchanged)
-        key = doc_key(company_id, source_id, url_str)
+        key = doc_key(business_slug, source_id, url_str)
         content_hash = hashlib.sha256(md_str.encode("utf-8")).hexdigest()
 
         existing = db.query(Document).filter(Document.doc_key == key).one_or_none()
@@ -111,7 +111,7 @@ async def firecrawl_ingest(
             continue
 
         doc_json = {
-            "company_id": company_id,
+            "business_slug": business_slug,
             "source_id": source_id,
             "crawl_job_id": crawl_job_id,
             "url": url_str,
@@ -132,7 +132,7 @@ async def firecrawl_ingest(
             db.add(
                 Document(
                     doc_key=key,
-                    company_id=company_id,
+                    business_slug=business_slug,
                     source_id=source_id,
                     url=url_str,
                     content_hash=content_hash,
@@ -145,7 +145,7 @@ async def firecrawl_ingest(
 
         # 5) Trigger RAG ingestion per document (real-time)
         ingest_markdown_to_qdrant(
-            company_id=company_id,
+            business_slug=business_slug,
             source_id=source_id,
             url=url_str,
             markdown=md_str,
