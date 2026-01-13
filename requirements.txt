@@ -5,7 +5,6 @@ pydantic==2.10.4
 pydantic-settings==2.7.0
 python-dotenv==1.0.1
 
-# Qdrant client (since teammate uses Qdrant)
 qdrant-client==1.12.1
 
 # optional async http (if your rag pipeline needs)

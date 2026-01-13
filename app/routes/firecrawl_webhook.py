@@ -69,7 +69,7 @@ async def firecrawl_ingest(
         # store event already; nothing else needed
         return {"ok": True, "event_id": event.id, "type": event.type}
 
-    # 3) Enforce tenant/source mapping (required by your teammate)
+    # 3) Enforce tenant/source mapping
     company_id = str(event.metadata.get("company_id") or "")
     source_id = str(event.metadata.get("source_id") or "")
     crawl_job_id = str(event.metadata.get("crawl_job_id") or event.id or "")
@@ -87,7 +87,7 @@ async def firecrawl_ingest(
     for item in event.data:
         # Flexible extraction: Firecrawl doc shape varies by event.
         # Common fields: markdown/html/metadata.source_url or source_url/url.
-        md = item.get("markdown") or item.get("content")  # teammate wants {"content": markdown, "url": ...}
+        md = item.get("markdown") or item.get("content")
         url = (
             (item.get("metadata") or {}).get("source_url")
             or item.get("source_url")
